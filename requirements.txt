@@ -1,6 +1,6 @@
-streamlit
 numpy
 pandas
-tensorflow  # or keras if using standalone Keras
-scikit-learn
 matplotlib
+scikit-learn
+tensorflow
+streamlit
