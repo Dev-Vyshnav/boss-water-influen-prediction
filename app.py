@@ -9,7 +9,7 @@ import streamlit as st
 
 st.title("Wastewater Treatment Plant Effluent Prediction")
 
-# Sample data
+# Sample data (keeping this for training the model)
 data = {
     'Influent_COD': [320, 310, 330, 300, 340, 325, 315, 310, 320, 330],
     'Influent_NH3_N': [22.3, 21.8, 23.0, 20.5, 23.5, 22.0, 21.2, 22.1, 22.0, 23.0],
@@ -44,23 +44,37 @@ def train_model():
 
 model, history = train_model()
 
-# Predictions
-predictions = model.predict(X_test, verbose=0)
+# User Input Section
+st.subheader("Enter Influent Parameters")
+col1, col2 = st.columns(2)
 
-# Comparison DataFrame
-comparison_df = pd.DataFrame({
-    'Actual COD': y_test[:, 0], 'Predicted COD': predictions[:, 0],
-    'Actual NH3-N': y_test[:, 1], 'Predicted NH3-N': predictions[:, 1],
-    'Actual TN': y_test[:, 2], 'Predicted TN': predictions[:, 2],
-    'Actual TP': y_test[:, 3], 'Predicted TP': predictions[:, 3],
-    'Actual BOD': y_test[:, 4], 'Predicted BOD': predictions[:, 4]
-})
+with col1:
+    influent_cod = st.number_input("Influent COD (mg/L)", min_value=0.0, value=320.0)
+    influent_nh3_n = st.number_input("Influent NH3-N (mg/L)", min_value=0.0, value=22.0)
+    influent_tn = st.number_input("Influent TN (mg/L)", min_value=0.0, value=49.0)
 
-# Display results
-st.subheader("Actual vs Predicted Effluent Parameters")
-st.dataframe(comparison_df.style.format("{:.2f}"))
+with col2:
+    influent_tp = st.number_input("Influent TP (mg/L)", min_value=0.0, value=3.5)
+    ph = st.number_input("pH", min_value=0.0, max_value=14.0, value=7.7)
+    influent_bod = st.number_input("Influent BOD (mg/L)", min_value=0.0, value=200.0)
 
-# Plot training loss
+# Predict button
+if st.button("Predict Effluent Parameters"):
+    # Prepare input data for prediction
+    input_data = np.array([[influent_cod, influent_nh3_n, influent_tn, influent_tp, ph, influent_bod]])
+    
+    # Make prediction
+    prediction = model.predict(input_data, verbose=0)[0]
+    
+    # Display predictions
+    st.subheader("Predicted Effluent Parameters")
+    pred_df = pd.DataFrame({
+        'Parameter': ['COD (mg/L)', 'NH3-N (mg/L)', 'TN (mg/L)', 'TP (mg/L)', 'BOD (mg/L)'],
+        'Predicted Value': prediction
+    })
+    st.dataframe(pred_df.style.format({'Predicted Value': '{:.2f}'}))
+
+# Plot training loss (optional - keeping this from original code)
 st.subheader("Training Loss")
 fig, ax = plt.subplots()
 ax.plot(history.history['loss'], label='Training Loss')
